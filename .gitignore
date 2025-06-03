@@ -1,0 +1,28 @@
+# Node
+**/node_modules/
+**/.pnpm/
+**/*.log
+
+# Builds
+**/dist/
+**/.next/
+**/build/
+**/coverage/
+**/*.tsbuildinfo
+
+# Env
+**/.env
+**/.env*
+
+# Editor / OS
+**/.vscode/
+**/.idea/
+**/.DS_Store
+**/Thumbs.db
+
+# Misc
+**/*.local
+**/*.swp
+**/*.swo
+**/*.bak
+**/*.old
