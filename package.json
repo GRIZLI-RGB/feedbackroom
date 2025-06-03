@@ -1,12 +1,18 @@
 {
-  "name": "feedbackroom",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+	"name": "feedbackroom",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "concurrently -k -n client,server -c blue,green \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
+		"install-all": "pnpm install --filter client... && pnpm install --filter server... && pnpm install --filter shared...",
+		"build": "pnpm --filter client build && pnpm --filter server build",
+		"prod": "pnpm install-all && pnpm build && pm2 start ecosystem.config.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"concurrently": "^9.1.2"
+	}
 }
