@@ -1,0 +1,91 @@
+{
+	"pages": {
+		"notFound": {
+			"title": "Page Not Found",
+			"description": "The page you're looking for doesn't exist or has been moved.",
+			"goHome": "Go to Homepage",
+			"goDashboard": "Go to Dashboard",
+			"allRightsReserved": "All rights reserved"
+		},
+		"landing": {
+			"heroTitle": "Get honest feedback to grow your product",
+			"heroDescription": "Collect anonymous feedback on your startup, product or team. Create a board, share the link, and start improving.",
+			"createBoard": "Create Board",
+			"learnMore": "Learn How It Works",
+			"new": "New",
+			"featuresTitle": "Why Choose FeedbackRoom?",
+			"featuresSubtitle": "Powerful features designed to help you collect better feedback",
+			"features": [
+				{
+					"title": "100% Anonymous",
+					"description": "Get truly honest feedback without identity disclosure",
+					"tags": ["Secure", "Private"]
+				},
+				{
+					"title": "Zero Setup",
+					"description": "Start collecting feedback in seconds, no registration needed",
+					"tags": ["Fast", "Easy"]
+				},
+				{
+					"title": "Smart Analytics",
+					"description": "Automatic sentiment analysis and feedback categorization",
+					"tags": ["AI-powered", "Insights"]
+				},
+				{
+					"title": "Team Collaboration",
+					"description": "Invite team members and work on feedback together",
+					"tags": ["Shared", "Real-time"]
+				}
+			],
+			"howItWorksTitle": "How It Works",
+			"howItWorksSubtitle": "Get started in just 3 simple steps",
+			"steps": [
+				{
+					"title": "Create Your Board",
+					"description": "Set up a new feedback board in under a minute",
+					"details": [
+						"Choose public or private",
+						"Customize with your branding",
+						"Set optional questions"
+					]
+				},
+				{
+					"title": "Share the Link",
+					"description": "Send your unique board URL to anyone",
+					"details": [
+						"Works on any device",
+						"No login required",
+						"Track response rate"
+					]
+				},
+				{
+					"title": "Analyze Feedback",
+					"description": "Gain valuable insights from responses",
+					"details": [
+						"Sentiment analysis",
+						"Trend detection",
+						"Export to CSV"
+					]
+				}
+			],
+			"testimonialsTitle": "Trusted by Teams Worldwide",
+			"testimonialsSubtitle": "What our users say about FeedbackRoom",
+			"ctaTitle": "Ready to Transform Your Feedback Process?",
+			"ctaSubtitle": "Join thousands of teams getting better feedback today",
+			"footer": {
+				"description": "The easiest way to collect honest, anonymous feedback from your team and customers.",
+				"company": {
+					"title": "Company"
+				},
+				"legal": {
+					"title": "Legal"
+				}
+			}
+		}
+	},
+	"metadata": {
+		"title": "FeedbackRoom",
+		"description": "Anonymous feedback for startups and projects — get honest insights from your audience.",
+		"ogImageAlt": "FeedbackRoom — anonymous feedback"
+	}
+}
