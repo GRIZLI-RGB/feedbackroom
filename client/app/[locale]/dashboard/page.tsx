@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircle, Filter, Search, BarChart2, Settings } from "lucide-react";
+import { PlusCircle, Filter, Search, BarChart2, Users } from "lucide-react";
 import Link from "next/link";
 import { useRipple } from "react-use-ripple";
 
@@ -14,27 +14,33 @@ const projects = [
 		name: "Лендинг SaaS",
 		url: "saas.example.com",
 		feedbackCount: 12,
-		aiScore: 84,
+		targetFeedback: 20, // Добавляем цель по отзывам
 		lastUpdated: "2 часа назад",
 		type: "website",
+		status: "active",
+		priority: "high", // Добавляем приоритет
 	},
 	{
 		id: 2,
-		name: "Промо акции",
-		url: "promo.example.com",
+		name: "Мобильное приложение",
+		url: "myapp.com",
 		feedbackCount: 8,
-		aiScore: 76,
-		lastUpdated: "1 день назад",
-		type: "website",
+		targetFeedback: 15,
+		lastUpdated: "Вчера",
+		type: "app",
+		status: "paused",
+		priority: "medium",
 	},
 	{
 		id: 3,
-		name: "MVP приложения",
-		url: "mvp.example.com",
-		feedbackCount: 5,
-		aiScore: 92,
-		lastUpdated: "3 дня назад",
-		type: "app",
+		name: "Telegram бот",
+		url: "@myfeedbackbot",
+		feedbackCount: 23,
+		targetFeedback: 30,
+		lastUpdated: "5 минут назад",
+		type: "bot",
+		status: "active",
+		priority: "low",
 	},
 ];
 
@@ -74,12 +80,17 @@ export default function DashboardPage() {
 
 	const newButtonRef = useRef<HTMLButtonElement>(null);
 	const filtersButtonRef = useRef<HTMLButtonElement>(null);
+	const addProjectCardRef = useRef<HTMLButtonElement>(null);
 
 	useRipple(newButtonRef as React.RefObject<HTMLElement>, {
 		rippleColor: "rgba(59, 130, 246, 0.2)",
 	});
 
 	useRipple(filtersButtonRef as React.RefObject<HTMLElement>, {
+		rippleColor: "rgba(255, 255, 255, 0.2)",
+	});
+
+	useRipple(addProjectCardRef as React.RefObject<HTMLElement>, {
 		rippleColor: "rgba(255, 255, 255, 0.2)",
 	});
 
@@ -243,15 +254,12 @@ export default function DashboardPage() {
 						icon={<BarChart2 size={20} />}
 					/>
 					<StatCard
-						title="Средний AI Score"
-						value={Math.round(
-							projects.reduce((acc, p) => acc + p.aiScore, 0) /
-								projects.length
-						)}
-						icon={<Settings size={20} />}
+						title="Охват аудитории"
+						value={"192"}
+						icon={<Users size={20} />}
 					/>
 					<StatCard
-						title="Всего отзывов"
+						title="Получено отзывов"
 						value={projects.reduce(
 							(acc, p) => acc + p.feedbackCount,
 							0
@@ -268,15 +276,16 @@ export default function DashboardPage() {
 				))}
 
 				{/* Add New Project Card */}
-				<Link
-					href="/projects/new"
-					className="flex flex-col items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border-2 border-dashed border-white/30 rounded-2xl p-6 transition-all min-h-[200px]"
+				<button
+					onClick={() => setIsModalOpen(true)}
+					ref={addProjectCardRef}
+					className="flex flex-col items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border-2 border-dashed border-white/30 rounded-2xl p-6 transition-all min-h-[142px]"
 				>
 					<PlusCircle size={32} className="text-white" />
 					<span className="text-white font-medium">
 						Добавить проект
 					</span>
-				</Link>
+				</button>
 			</div>
 
 			<Modal open={isModalOpen} onClose={closeModal}>
@@ -450,33 +459,71 @@ export default function DashboardPage() {
 
 // Компонент карточки проекта
 function ProjectCard({ project }: { project: (typeof projects)[0] }) {
-	return (
-		<Link
-			href={`/projects/${project.id}`}
-			className="bg-white rounded-2xl p-5 hover:shadow-lg transition-all flex flex-col"
-		>
-			<h3 className="font-bold text-lg text-blue-800 mb-1">
-				{project.name}
-			</h3>
-			<p className="text-blue-600 text-sm mb-4">{project.url}</p>
+  const progress = Math.min(
+    Math.round((project.feedbackCount / project.targetFeedback) * 100),
+    100
+  );
 
-			<div className="flex gap-4 mt-auto">
-				<div>
-					<p className="text-gray-500 text-xs">Отзывов</p>
-					<p className="font-medium">{project.feedbackCount}</p>
-				</div>
-				<div>
-					<p className="text-gray-500 text-xs">AI Score</p>
-					<p className="font-medium">{project.aiScore}/100</p>
-				</div>
-				<div className="ml-auto">
-					<p className="text-gray-400 text-xs">
-						{project.lastUpdated}
-					</p>
-				</div>
-			</div>
-		</Link>
-	);
+  const typeStyles = {
+    website: {
+      color: "text-blue-600",
+      bg: "bg-white",
+      border: "border-blue-200",
+      progressColor: "bg-blue-500",
+      hoverEffect: "hover:ring-2 hover:ring-blue-200"
+    },
+    app: {
+      color: "text-purple-600",
+      bg: "bg-white",
+      border: "border-purple-200",
+      progressColor: "bg-purple-500",
+      hoverEffect: "hover:ring-2 hover:ring-purple-200"
+    },
+    bot: {
+      color: "text-green-600",
+      bg: "bg-white",
+      border: "border-green-200",
+      progressColor: "bg-green-500",
+      hoverEffect: "hover:ring-2 hover:ring-green-200"
+    }
+  };
+
+  const currentType = typeStyles[project.type as keyof typeof typeStyles];
+
+  return (
+    <Link
+      href={`/projects/${project.id}`}
+      className={`block rounded-lg p-5 transition-all ${currentType.bg} border ${currentType.border} ${currentType.hoverEffect}`}
+    >
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="font-bold text-lg text-gray-800">{project.name}</h3>
+          <p className="text-gray-600 text-sm">{project.url}</p>
+        </div>
+        <span className={`text-2xl ${currentType.color}`}>
+          {project.type === "website" ? "🌐" : project.type === "app" ? "📱" : "🤖"}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between mb-2">
+        <span className={`text-xs px-2 py-1 rounded-full ${
+          project.status === "active" 
+            ? "bg-green-100 text-green-800" 
+            : "bg-yellow-100 text-yellow-800"
+        }`}>
+          {project.status === "active" ? "Активен" : "Пауза"}
+        </span>
+        <span className="text-sm font-medium">{progress}%</span>
+      </div>
+
+      <div className="w-full bg-gray-200 rounded-full h-2">
+        <div 
+          className={`h-2 rounded-full ${currentType.progressColor}`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </Link>
+  );
 }
 
 // Компонент статистической карточки
@@ -555,498 +602,3 @@ function StatCard({
 		</div>
 	);
 }
-
-// // Mock data
-// const projects = [
-// 	{
-// 		id: 1,
-// 		name: "Лендинг SaaS",
-// 		url: "saas.example.com",
-// 		feedbackCount: 12,
-// 		lastUpdated: "2 часа назад",
-// 		type: "website",
-// 		status: "active",
-// 		progress: 75,
-// 	},
-// 	{
-// 		id: 2,
-// 		name: "Промо акции",
-// 		url: "promo.example.com",
-// 		feedbackCount: 8,
-// 		lastUpdated: "1 день назад",
-// 		type: "website",
-// 		status: "paused",
-// 		progress: 42,
-// 	},
-// 	{
-// 		id: 3,
-// 		name: "MVP приложения",
-// 		url: "mvp.example.com",
-// 		feedbackCount: 5,
-// 		lastUpdated: "3 дня назад",
-// 		type: "app",
-// 		status: "active",
-// 		progress: 90,
-// 	},
-// ];
-
-// const projectTypes = [
-// 	{
-// 		id: "website",
-// 		name: "Веб-сайт",
-// 		icon: "🌐",
-// 		description: "Лендинги, промо-страницы, веб-приложения",
-// 	},
-// 	{
-// 		id: "app",
-// 		name: "Мобильное приложение",
-// 		icon: "📱",
-// 		description: "iOS, Android или кроссплатформенные приложения",
-// 	},
-// 	{
-// 		id: "bot",
-// 		name: "Telegram бот",
-// 		icon: "🤖",
-// 		description: "Чат-боты для Telegram",
-// 	},
-// ];
-
-// const audienceTypes = [
-// 	{ id: "general", name: "Общая аудитория" },
-// 	{ id: "business", name: "Бизнес-аудитория" },
-// 	{ id: "teenagers", name: "Подростки" },
-// 	{ id: "students", name: "Студенты" },
-// ];
-
-// export default function DashboardPage() {
-// 	const [isModalOpen, setIsModalOpen] = useState(false);
-// 	const [step, setStep] = useState(1);
-// 	const [selectedProjectType, setSelectedProjectType] = useState("");
-// 	const [selectedAudience, setSelectedAudience] = useState("");
-// 	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-// 	const buttonRef = useRef<HTMLButtonElement>(null);
-
-// 	useRipple(buttonRef as React.RefObject<HTMLElement>, {
-// 		rippleColor: "rgba(59, 130, 246, 0.2)",
-// 	});
-
-// 	useEffect(() => {
-// 		const handleMouseMove = (e: MouseEvent) => {
-// 			setMousePosition({ x: e.clientX, y: e.clientY });
-// 		};
-
-// 		window.addEventListener("mousemove", handleMouseMove);
-// 		return () => window.removeEventListener("mousemove", handleMouseMove);
-// 	}, []);
-
-// 	const closeModal = () => {
-// 		setIsModalOpen(false);
-// 		setStep(1);
-// 		setSelectedProjectType("");
-// 		setSelectedAudience("");
-// 	};
-
-// 	const handleNextStep = () => {
-// 		setStep((prev) => prev + 1);
-// 	};
-
-// 	const handlePrevStep = () => {
-// 		setStep((prev) => prev - 1);
-// 	};
-
-// 	const handleSubmit = () => {
-// 		closeModal();
-// 	};
-
-// 	// Фоновые элементы, реагирующие на курсор
-// 	const backgroundElements = Array.from({ length: 15 }).map((_, i) => {
-// 		const distanceX = mousePosition.x / window.innerWidth - 0.5;
-// 		const distanceY = mousePosition.y / window.innerHeight - 0.5;
-
-// 		return (
-// 			<motion.div
-// 				key={i}
-// 				className="absolute rounded-full bg-blue-400/10 backdrop-blur-sm"
-// 				initial={{
-// 					x: Math.random() * 100,
-// 					y: Math.random() * 100,
-// 					width: Math.random() * 200 + 100,
-// 					height: Math.random() * 200 + 100,
-// 					opacity: 0.3,
-// 				}}
-// 				animate={{
-// 					x: Math.random() * 100 + distanceX * 50,
-// 					y: Math.random() * 100 + distanceY * 50,
-// 					transition: {
-// 						duration: 10 + Math.random() * 10,
-// 						repeat: Infinity,
-// 						repeatType: "reverse",
-// 					},
-// 				}}
-// 			/>
-// 		);
-// 	});
-
-// 	return (
-// 		<div className="flex flex-col gap-6 relative overflow-hidden">
-// 			{/* Анимированный фон */}
-// 			<div className="fixed inset-0 -z-10 overflow-hidden">
-// 				{backgroundElements}
-// 				<div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-blue-800/30" />
-// 			</div>
-
-// 			{/* Header */}
-// 			<motion.div
-// 				initial={{ opacity: 0, y: -20 }}
-// 				animate={{ opacity: 1, y: 0 }}
-// 				className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-// 			>
-// 				<div>
-// 					<h1 className="text-2xl md:text-3xl font-bold text-white">
-// 						Мои проекты
-// 					</h1>
-// 					<p className="text-blue-100">
-// 						Анализируйте обратную связь по вашим проектам
-// 					</p>
-// 				</div>
-
-// 				<div className="flex gap-3 w-full md:w-auto">
-// 					<button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl transition-all">
-// 						<Filter size={18} />
-// 						<span>Фильтры</span>
-// 					</button>
-// 					<button
-// 						ref={buttonRef}
-// 						onClick={() => setIsModalOpen(true)}
-// 						className="flex items-center gap-2 bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-xl font-medium transition-all"
-// 					>
-// 						<PlusCircle size={18} />
-// 						<span>Новый проект</span>
-// 					</button>
-// 				</div>
-// 			</motion.div>
-
-// 			{/* Search and Stats */}
-// 			<motion.div
-// 				initial={{ opacity: 0, y: -20 }}
-// 				animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-// 				className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10"
-// 			>
-// 				<div className="relative mb-4">
-// 					<Search
-// 						className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200"
-// 						size={18}
-// 					/>
-// 					<input
-// 						type="text"
-// 						placeholder="Поиск проектов..."
-// 						className="w-full bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/30"
-// 					/>
-// 				</div>
-
-// 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-// 					<StatCard
-// 						title="Активных проектов"
-// 						value={
-// 							projects.filter((p) => p.status === "active").length
-// 						}
-// 						icon={<Activity size={20} />}
-// 						trend="up"
-// 					/>
-// 					<StatCard
-// 						title="Всего отзывов"
-// 						value={projects.reduce(
-// 							(acc, p) => acc + p.feedbackCount,
-// 							0
-// 						)}
-// 						icon={<Users size={20} />}
-// 					/>
-// 					<StatCard
-// 						title="Скорость сбора"
-// 						value="24ч"
-// 						icon={<Zap size={20} />}
-// 						description="Среднее время"
-// 					/>
-// 				</div>
-// 			</motion.div>
-
-// 			{/* Projects Grid */}
-// 			<motion.div
-// 				initial={{ opacity: 0 }}
-// 				animate={{ opacity: 1, transition: { delay: 0.2 } }}
-// 				className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-// 			>
-// 				{projects.map((project) => (
-// 					<ProjectCard key={project.id} project={project} />
-// 				))}
-
-// 				{/* Add New Project Card */}
-// 				<motion.div
-// 					whileHover={{ scale: 1.02 }}
-// 					whileTap={{ scale: 0.98 }}
-// 					className="flex flex-col items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border-2 border-dashed border-white/30 rounded-2xl p-6 transition-all min-h-[200px] cursor-pointer"
-// 					onClick={() => setIsModalOpen(true)}
-// 				>
-// 					<PlusCircle size={32} className="text-white" />
-// 					<span className="text-white font-medium">
-// 						Добавить проект
-// 					</span>
-// 				</motion.div>
-// 			</motion.div>
-
-// 			{/* Модальное окно (остаётся без изменений) */}
-// 			<Modal open={isModalOpen} onClose={closeModal}>
-// 				<div className="p-6">
-// 					<h2 className="text-2xl font-bold text-blue-800 mb-2">
-// 						Добавить новый проект
-// 					</h2>
-// 					<div className="flex mb-6">
-// 						{[1, 2, 3].map((stepNumber) => (
-// 							<div key={stepNumber} className="flex items-center">
-// 								<div
-// 									className={`w-8 h-8 rounded-full flex items-center justify-center ${
-// 										step === stepNumber
-// 											? "bg-blue-600 text-white"
-// 											: step > stepNumber
-// 											? "bg-green-100 text-green-600"
-// 											: "bg-gray-100 text-gray-400"
-// 									}`}
-// 								>
-// 									{stepNumber}
-// 								</div>
-// 								{stepNumber < 3 && (
-// 									<div
-// 										className={`h-1 w-12 ${
-// 											step > stepNumber
-// 												? "bg-green-100"
-// 												: "bg-gray-100"
-// 										}`}
-// 									/>
-// 								)}
-// 							</div>
-// 						))}
-// 					</div>
-
-// 					{/* Шаг 1: Выбор типа проекта */}
-// 					{step === 1 && (
-// 						<div className="space-y-4">
-// 							<h3 className="text-lg font-medium text-gray-700">
-// 								Выберите тип проекта
-// 							</h3>
-// 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-// 								{projectTypes.map((type) => (
-// 									<div key={type.id}>
-// 										<button
-// 											onClick={() =>
-// 												setSelectedProjectType(type.id)
-// 											}
-// 											className={`w-full p-4 border-2 rounded-xl text-center transition-all ${
-// 												selectedProjectType === type.id
-// 													? "border-blue-500 bg-blue-50"
-// 													: "border-gray-200 hover:border-blue-300"
-// 											}`}
-// 										>
-// 											<div className="text-3xl mb-2">
-// 												{type.icon}
-// 											</div>
-// 											<h4 className="font-medium">
-// 												{type.name}
-// 											</h4>
-// 											<p className="text-sm text-gray-500 mt-1">
-// 												{type.description}
-// 											</p>
-// 										</button>
-// 									</div>
-// 								))}
-// 							</div>
-// 						</div>
-// 					)}
-
-// 					{/* Шаг 2: Выбор аудитории */}
-// 					{step === 2 && (
-// 						<div className="space-y-4">
-// 							<h3 className="text-lg font-medium text-gray-700">
-// 								Целевая аудитория
-// 							</h3>
-// 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-// 								{audienceTypes.map((audience) => (
-// 									<div key={audience.id}>
-// 										<button
-// 											onClick={() =>
-// 												setSelectedAudience(audience.id)
-// 											}
-// 											className={`w-full p-3 border rounded-lg text-left transition-all ${
-// 												selectedAudience === audience.id
-// 													? "border-blue-500 bg-blue-50"
-// 													: "border-gray-200 hover:border-blue-300"
-// 											}`}
-// 										>
-// 											{audience.name}
-// 										</button>
-// 									</div>
-// 								))}
-// 							</div>
-// 						</div>
-// 					)}
-
-// 					{/* Шаг 3: Детали проекта */}
-// 					{step === 3 && (
-// 						<div className="space-y-4">
-// 							<h3 className="text-lg font-medium text-gray-700">
-// 								Информация о проекте
-// 							</h3>
-// 							<div className="space-y-3">
-// 								<div>
-// 									<label className="block text-sm font-medium text-gray-700 mb-1">
-// 										Название проекта
-// 									</label>
-// 									<input
-// 										type="text"
-// 										className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-// 										placeholder="Мой крутой проект"
-// 									/>
-// 								</div>
-// 								<div>
-// 									<label className="block text-sm font-medium text-gray-700 mb-1">
-// 										URL или идентификатор
-// 									</label>
-// 									<input
-// 										type="text"
-// 										className="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-// 										placeholder="example.com или app_id"
-// 									/>
-// 								</div>
-// 							</div>
-// 						</div>
-// 					)}
-
-// 					{/* Навигация по шагам */}
-// 					<div className="flex justify-between mt-8">
-// 						{step > 1 ? (
-// 							<button
-// 								onClick={handlePrevStep}
-// 								className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg"
-// 							>
-// 								Назад
-// 							</button>
-// 						) : (
-// 							<div></div>
-// 						)}
-
-// 						{step < 3 ? (
-// 							<button
-// 								onClick={handleNextStep}
-// 								disabled={
-// 									(step === 1 && !selectedProjectType) ||
-// 									(step === 2 && !selectedAudience)
-// 								}
-// 								className={`px-6 py-2 rounded-lg font-medium ${
-// 									(step === 1 && !selectedProjectType) ||
-// 									(step === 2 && !selectedAudience)
-// 										? "bg-gray-200 text-gray-400 cursor-not-allowed"
-// 										: "bg-blue-600 text-white hover:bg-blue-700"
-// 								}`}
-// 							>
-// 								Далее
-// 							</button>
-// 						) : (
-// 							<button
-// 								onClick={handleSubmit}
-// 								className="px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700"
-// 							>
-// 								Создать проект
-// 							</button>
-// 						)}
-// 					</div>
-// 				</div>
-// 			</Modal>
-// 		</div>
-// 	);
-// }
-
-// // Обновлённая карточка проекта
-// function ProjectCard({ project }: { project: (typeof projects)[0] }) {
-// 	return (
-// 		<motion.div
-// 			whileHover={{ y: -5 }}
-// 			className="bg-white rounded-2xl p-5 hover:shadow-lg transition-all flex flex-col border border-gray-100 relative overflow-hidden"
-// 		>
-// 			{/* Индикатор статуса */}
-// 			<div
-// 				className={`absolute top-0 left-0 w-full h-1 ${
-// 					project.status === "active"
-// 						? "bg-green-500"
-// 						: "bg-yellow-500"
-// 				}`}
-// 			/>
-
-// 			{/* Заголовок и тип */}
-// 			<div className="flex items-start justify-between mb-3">
-// 				<div>
-// 					<h3 className="font-bold text-lg text-blue-800">
-// 						{project.name}
-// 					</h3>
-// 					<p className="text-blue-600 text-sm">{project.url}</p>
-// 				</div>
-// 				<span className="text-2xl">
-// 					{project.type === "website"
-// 						? "🌐"
-// 						: project.type === "app"
-// 						? "📱"
-// 						: "🤖"}
-// 				</span>
-// 			</div>
-
-// 			{/* Прогресс бар */}
-// 			<div className="mb-4">
-// 				<div className="flex justify-between text-xs text-gray-500 mb-1">
-// 					<span>Прогресс сбора</span>
-// 					<span>{project.progress}%</span>
-// 				</div>
-// 				<div className="w-full bg-gray-200 rounded-full h-2">
-// 					<div
-// 						className={`h-2 rounded-full ${
-// 							project.progress > 70
-// 								? "bg-green-500"
-// 								: project.progress > 30
-// 								? "bg-blue-500"
-// 								: "bg-yellow-500"
-// 						}`}
-// 						style={{ width: `${project.progress}%` }}
-// 					/>
-// 				</div>
-// 			</div>
-
-// 			{/* Статистика */}
-// 			<div className="flex gap-4 mt-auto pt-3 border-t border-gray-100">
-// 				<div className="text-center">
-// 					<p className="text-gray-500 text-xs">Отзывов</p>
-// 					<p className="font-medium text-blue-600">
-// 						{project.feedbackCount}
-// 					</p>
-// 				</div>
-// 				<div className="text-center">
-// 					<p className="text-gray-500 text-xs">Статус</p>
-// 					<p
-// 						className={`font-medium ${
-// 							project.status === "active"
-// 								? "text-green-600"
-// 								: "text-yellow-600"
-// 						}`}
-// 					>
-// 						{project.status === "active" ? "Активен" : "На паузе"}
-// 					</p>
-// 				</div>
-// 				<div className="ml-auto text-right">
-// 					<p className="text-gray-400 text-xs">
-// 						{project.lastUpdated}
-// 					</p>
-// 					<button className="text-blue-600 text-xs font-medium hover:text-blue-800">
-// 						Подробнее →
-// 					</button>
-// 				</div>
-// 			</div>
-// 		</motion.div>
-// 	);
-// }
